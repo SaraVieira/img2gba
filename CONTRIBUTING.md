@@ -39,6 +39,9 @@ cd gba-images
 # The -e flag means changes to the code take effect immediately
 # The [dev] part installs testing tools (pytest)
 pip install -e ".[dev]"
+
+# To also install TUI dependencies (Textual)
+pip install -e ".[dev,tui]"
 ```
 
 ### Verify installation
@@ -49,6 +52,9 @@ butano-img --help
 
 # Run the tests
 pytest
+
+# Launch the TUI (if installed with tui extra)
+butano-img tui
 ```
 
 ---
@@ -61,6 +67,7 @@ gba-images/
 │   └── butano_img/           # Main package (all the code lives here)
 │       ├── __init__.py       # Package initialization, exports public API
 │       ├── cli.py            # Command-line interface (what users interact with)
+│       ├── tui.py            # Terminal User Interface (Textual app)
 │       ├── constants.py      # Valid sizes and other constants
 │       ├── converter.py      # Main orchestration (coordinates all the steps)
 │       ├── json_generator.py # Creates the .json metadata files
@@ -84,7 +91,8 @@ gba-images/
 | File | Purpose |
 |------|---------|
 | `__init__.py` | Makes the folder a "package". Also defines what gets exported when someone does `from butano_img import ...` |
-| `cli.py` | Defines the command-line commands (`convert`, `validate`, `sizes`) using the Click library |
+| `cli.py` | Defines the command-line commands (`convert`, `validate`, `sizes`, `tui`) using the Click library |
+| `tui.py` | Terminal User Interface using Textual - provides interactive file browser, options, and conversion |
 | `constants.py` | Stores all the valid sprite/background sizes. Easy to find and modify. |
 | `converter.py` | The "brain" - coordinates loading images, processing them, and saving results |
 | `json_generator.py` | Simple module to create the `.json` files Butano needs |
@@ -247,6 +255,118 @@ def convert(input_file, ...):
 ```
 
 **Click** is a library that makes it easy to create command-line tools. The decorators (`@click.command()`, `@click.option()`) define how arguments are parsed.
+
+### tui.py
+
+The Terminal User Interface built with **Textual**. Textual is a Python framework for building rich terminal applications with mouse support, styled widgets, and reactive updates.
+
+#### TUI Architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ Header                                                        │
+├─────────────────────────┬────────────────────────────────────┤
+│                         │ Selected File                       │
+│   Directory Tree        ├────────────────────────────────────┤
+│   (FilteredDirectoryTree)│ Validation Status                  │
+│                         ├────────────────────────────────────┤
+│   - Only shows images   │ Options                             │
+│   - .png, .jpg, etc.    │   - Asset Type (RadioSet)           │
+│                         │   - Colors (RadioSet)               │
+│                         ├────────────────────────────────────┤
+│                         │ [Convert Button]                    │
+│                         ├────────────────────────────────────┤
+│                         │ Output Log (RichLog)                │
+├─────────────────────────┴────────────────────────────────────┤
+│ Footer (key bindings)                                         │
+└──────────────────────────────────────────────────────────────┘
+```
+
+#### Key Components
+
+```python
+class FilteredDirectoryTree(DirectoryTree):
+    """Custom directory tree that only shows image files."""
+
+    def filter_paths(self, paths: list[Path]) -> list[Path]:
+        # Only show directories and image files
+        return [p for p in paths if p.is_dir() or p.suffix.lower() in IMAGE_EXTENSIONS]
+
+
+class ButanoImgApp(App):
+    """Main application class."""
+
+    # CSS styling (inline, similar to web CSS)
+    CSS = """
+    #file-panel { width: 40%; }
+    .validation-valid { color: $success; }
+    """
+
+    # Keyboard shortcuts
+    BINDINGS = [
+        Binding("q", "quit", "Quit"),
+        Binding("c", "convert", "Convert"),
+    ]
+
+    def compose(self) -> ComposeResult:
+        """Build the UI widget tree."""
+        yield Header()
+        yield DirectoryTree(...)
+        yield Footer()
+
+    @on(DirectoryTree.FileSelected)
+    def on_file_selected(self, event):
+        """Handle file selection events."""
+        pass
+```
+
+#### Textual Concepts
+
+**Widgets**: UI components like `Button`, `Label`, `DirectoryTree`, `RadioSet`
+
+**Containers**: Layout widgets like `Vertical`, `Horizontal`, `Container`
+
+**Events**: User actions that trigger handlers (decorated with `@on`)
+
+**Bindings**: Keyboard shortcuts defined in `BINDINGS` list
+
+**CSS**: Styling uses a CSS-like syntax (not actual CSS, but similar)
+
+**Reactive**: Properties can trigger UI updates when changed
+
+#### Running the TUI
+
+```bash
+# Via CLI
+butano-img tui
+
+# Direct entry point
+butano-img-tui
+
+# During development
+python -m butano_img.tui
+```
+
+#### Extending the TUI
+
+To add a new option:
+
+1. Add a widget in `compose()`:
+```python
+yield RadioButton("New Option", id="radio-new")
+```
+
+2. Add an event handler:
+```python
+@on(RadioSet.Changed, "#my-radio-set")
+def on_option_changed(self, event):
+    self.my_option = event.pressed.id
+```
+
+3. Use the value in `action_convert()`:
+```python
+result = convert_image(..., my_option=self.my_option)
+```
 
 ---
 
