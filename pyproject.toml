@@ -35,6 +35,7 @@ dev = [
 
 [project.scripts]
 butano-img = "butano_img.cli:main"
+butano-img-tui = "butano_img.tui:main"
 
 [project.urls]
 Homepage = "https://github.com/SaraVieira/butano-img"

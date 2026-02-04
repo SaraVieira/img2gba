@@ -179,5 +179,24 @@ def validate(input_file: Path, asset_type: str):
         click.echo(f"Suggested sizes: {', '.join(suggestions)}")
 
 
+@main.command()
+def tui():
+    """Launch the interactive TUI (Terminal User Interface).
+
+    Requires the 'tui' extra: pip install butano-img[tui]
+    """
+    try:
+        from .tui import main as tui_main
+        tui_main()
+    except ImportError:
+        click.secho(
+            "Error: TUI dependencies not installed.\n"
+            "Install with: pip install butano-img[tui]",
+            fg="red",
+            err=True,
+        )
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     main()
