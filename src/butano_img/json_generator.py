@@ -30,6 +30,20 @@ With color depth:
         "bpp_mode": "bpp_8"
     }
 
+For sprite sheets (multiple sprites in one image):
+
+    {
+        "type": "sprite",
+        "height": 32
+    }
+
+With compression (reduces ROM size):
+
+    {
+        "type": "regular_bg",
+        "compression": "lz77"
+    }
+
 For more complex configurations, see the Butano documentation:
 https://gvaliente.github.io/butano/import.html
 
@@ -55,6 +69,8 @@ def generate_json(
     output_path: str | Path,
     asset_type: str,
     bpp: int | None = None,
+    height: int | None = None,
+    compression: str | None = None,
     extra_fields: dict[str, Any] | None = None,
 ) -> Path:
     """
@@ -78,10 +94,21 @@ def generate_json(
              - 8: 256-color mode (more colors, one shared palette)
              - None: Don't specify (Butano will use default)
 
+        height: Height of each sprite/frame in pixels (optional).
+                Used for sprite sheets - an image with 128px total height
+                and height=32 would be split into 4 sprites.
+                Only meaningful for sprite and regular_bg types.
+
+        compression: Compression method for grit to use (optional):
+                    - "none": No compression (fastest loading)
+                    - "lz77": LZ77 compression (good balance)
+                    - "run_length": Run-length encoding
+                    - "huffman": Huffman coding
+                    - "auto": Let grit choose the best method
+
         extra_fields: Additional fields to include in the JSON (optional).
                      Useful for advanced Butano settings like:
                      - "palette": path to shared palette
-                     - "compression": "auto", "lz77", "run_length", etc.
                      See Butano docs for all options.
 
     Returns:
@@ -93,17 +120,18 @@ def generate_json(
         >>> print(json_path)
         player.json
 
-        >>> # With extra fields
-        >>> json_path = generate_json(
-        ...     "enemy.bmp",
-        ...     "sprite",
-        ...     bpp=4,
-        ...     extra_fields={"palette": "shared_enemies.bmp"}
-        ... )
+        >>> # Sprite sheet with 4 frames of 32px each
+        >>> json_path = generate_json("run_cycle.bmp", "sprite", height=32)
+
+        >>> # Background with compression
+        >>> json_path = generate_json("level.bmp", "regular_bg", compression="lz77")
 
     Generated JSON Examples:
         Basic sprite:
             {"type": "sprite", "bpp_mode": "bpp_8"}
+
+        Sprite sheet:
+            {"type": "sprite", "height": 32}
 
         Background with compression:
             {"type": "regular_bg", "compression": "lz77"}
@@ -128,6 +156,16 @@ def generate_json(
             data["bpp_mode"] = "bpp_8"
         # Note: Invalid bpp values are silently ignored
         # (could add validation here if needed)
+
+    # Add height for sprite sheets
+    # This tells Butano how to split a single image into multiple sprites/frames
+    if height is not None:
+        data["height"] = height
+
+    # Add compression method
+    # This tells grit how to compress the data during build
+    if compression is not None and compression != "none":
+        data["compression"] = compression
 
     # Merge in any extra fields the caller wants to add
     if extra_fields:

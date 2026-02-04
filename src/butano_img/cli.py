@@ -7,7 +7,7 @@ import click
 
 from . import __version__
 from .converter import convert_image
-from .constants import VALID_ASSET_TYPES, COLORS_16, COLORS_256
+from .constants import VALID_ASSET_TYPES, COLORS_16, COLORS_256, VALID_COMPRESSION_TYPES
 from .validator import format_valid_sizes
 
 
@@ -71,6 +71,17 @@ def main():
     help="Don't generate JSON metadata file",
 )
 @click.option(
+    "-h", "--height",
+    "sprite_height",
+    type=int,
+    help="Height of each sprite in a sprite sheet (for multi-sprite images)",
+)
+@click.option(
+    "--compression",
+    type=click.Choice(VALID_COMPRESSION_TYPES),
+    help="Compression method (none, lz77, run_length, huffman, auto)",
+)
+@click.option(
     "-v", "--verbose",
     is_flag=True,
     help="Show detailed output",
@@ -83,6 +94,8 @@ def convert(
     no_transparency: bool,
     trans_color: tuple[int, int, int] | None,
     no_json: bool,
+    sprite_height: int | None,
+    compression: str | None,
     verbose: bool,
 ):
     """Convert a PNG image to Butano-compatible BMP format.
@@ -96,6 +109,10 @@ def convert(
         butano-img convert background.png -t regular_bg
 
         butano-img convert tiles.png -c 16 -v
+
+        butano-img convert spritesheet.png -h 32  # Split into 32px high sprites
+
+        butano-img convert level.png -t regular_bg --compression lz77
     """
     num_colors = COLORS_16 if colors == "16" else COLORS_256
 
@@ -108,6 +125,8 @@ def convert(
             handle_transparency=not no_transparency,
             trans_color=trans_color,
             generate_json_file=not no_json,
+            sprite_height=sprite_height,
+            compression=compression,
             verbose=verbose,
         )
 
@@ -121,6 +140,12 @@ def convert(
             if result.transparency_color:
                 r, g, b = result.transparency_color
                 click.echo(f"    Transparency: RGB({r}, {g}, {b}) at index 0")
+
+            if sprite_height:
+                click.echo(f"    Sprite height: {sprite_height}px (sprite sheet mode)")
+
+            if compression and compression != "none":
+                click.echo(f"    Compression: {compression}")
 
             if not result.validation.valid:
                 click.secho(f"    Warning: {result.validation.message}", fg="yellow")
@@ -177,6 +202,25 @@ def validate(input_file: Path, asset_type: str):
         click.secho("Status: INVALID", fg="red")
         suggestions = [f"{s[0]}x{s[1]}" for s in result.suggestions]
         click.echo(f"Suggested sizes: {', '.join(suggestions)}")
+
+
+@main.command()
+def tui():
+    """Launch the interactive TUI (Terminal User Interface).
+
+    Requires the 'tui' extra: pip install butano-img[tui]
+    """
+    try:
+        from .tui import main as tui_main
+        tui_main()
+    except ImportError:
+        click.secho(
+            "Error: TUI dependencies not installed.\n"
+            "Install with: pip install butano-img[tui]",
+            fg="red",
+            err=True,
+        )
+        sys.exit(1)
 
 
 if __name__ == "__main__":

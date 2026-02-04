@@ -128,6 +128,51 @@ COLORS_16 = 16    # 4bpp mode
 COLORS_256 = 256  # 8bpp mode
 
 # =============================================================================
+# COMPRESSION TYPES
+# =============================================================================
+
+# Compression options supported by Butano/grit.
+# These can be specified in the JSON file to reduce ROM size.
+#
+# Note: The compression happens during Butano's build process, not in this tool.
+# We just set the flag in the JSON file to tell grit what compression to use.
+COMPRESSION_NONE = "none"           # No compression (default, fastest loading)
+COMPRESSION_LZ77 = "lz77"           # LZ77 compression (good balance)
+COMPRESSION_RUN_LENGTH = "run_length"  # Run-length encoding (good for simple images)
+COMPRESSION_HUFFMAN = "huffman"     # Huffman coding (best for varied data)
+COMPRESSION_AUTO = "auto"           # Let grit choose the best method
+
+# List of valid compression types (used for CLI validation)
+VALID_COMPRESSION_TYPES: list[str] = [
+    COMPRESSION_NONE,
+    COMPRESSION_LZ77,
+    COMPRESSION_RUN_LENGTH,
+    COMPRESSION_HUFFMAN,
+    COMPRESSION_AUTO,
+]
+
+# =============================================================================
+# ADDITIONAL ASSET TYPES (for separate tiles/palette generation)
+# =============================================================================
+
+# These types generate only part of the asset, useful for palette sharing
+ASSET_TYPE_SPRITE_TILES = "sprite_tiles"
+ASSET_TYPE_SPRITE_PALETTE = "sprite_palette"
+ASSET_TYPE_REGULAR_BG_TILES = "regular_bg_tiles"
+ASSET_TYPE_BG_PALETTE = "bg_palette"
+
+# Extended list including separate tile/palette types
+VALID_ASSET_TYPES_EXTENDED: list[str] = [
+    ASSET_TYPE_SPRITE,
+    ASSET_TYPE_SPRITE_TILES,
+    ASSET_TYPE_SPRITE_PALETTE,
+    ASSET_TYPE_REGULAR_BG,
+    ASSET_TYPE_REGULAR_BG_TILES,
+    ASSET_TYPE_BG_PALETTE,
+    ASSET_TYPE_AFFINE_BG,
+]
+
+# =============================================================================
 # TRANSPARENCY
 # =============================================================================
 

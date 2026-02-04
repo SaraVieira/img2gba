@@ -116,6 +116,8 @@ def convert_image(
     handle_transparency: bool = True,
     trans_color: tuple[int, int, int] | None = None,
     generate_json_file: bool = True,
+    sprite_height: int | None = None,
+    compression: str | None = None,
     verbose: bool = False,
 ) -> ConversionResult:
     """
@@ -153,6 +155,17 @@ def convert_image(
 
         generate_json_file: If True (default), create the JSON metadata file
                            that Butano requires alongside the BMP.
+
+        sprite_height: Height of each sprite/frame in a sprite sheet (optional).
+                      For an image with 128px height and sprite_height=32,
+                      Butano will split it into 4 separate sprites.
+
+        compression: Compression method for grit to use (optional):
+                    - "none": No compression (fastest loading)
+                    - "lz77": LZ77 compression (good balance)
+                    - "run_length": Run-length encoding
+                    - "huffman": Huffman coding
+                    - "auto": Let grit choose the best method
 
         verbose: If True, print progress messages during conversion.
                 Useful for debugging or understanding what's happening.
@@ -291,11 +304,21 @@ def convert_image(
         # 16 colors = 4bpp, 256 colors = 8bpp
         bpp = 4 if num_colors <= 16 else 8
 
-        # Create the JSON file
-        json_path = generate_json(output_path, asset_type, bpp=bpp)
+        # Create the JSON file with all configured options
+        json_path = generate_json(
+            output_path,
+            asset_type,
+            bpp=bpp,
+            height=sprite_height,
+            compression=compression,
+        )
 
         if verbose:
             print(f"Generated JSON: {json_path}")
+            if sprite_height:
+                print(f"  Sprite height: {sprite_height}px")
+            if compression and compression != "none":
+                print(f"  Compression: {compression}")
 
     # --- Return the result ---
     return ConversionResult(

@@ -8,6 +8,9 @@ Convert PNG images to Butano GBA-compatible indexed BMP format.
 - Automatic transparency handling (first palette color = transparent)
 - Size validation for sprites and backgrounds
 - JSON metadata generation for Butano
+- **Sprite sheet support** - Split multi-frame images with `--height`
+- **Compression options** - LZ77, run-length, huffman, or auto
+- **Interactive TUI** for visual file selection and conversion
 
 ## Installation
 
@@ -15,10 +18,16 @@ Convert PNG images to Butano GBA-compatible indexed BMP format.
 pip install butano-img
 ```
 
+With TUI support:
+
+```bash
+pip install butano-img[tui]
+```
+
 Or with pipx:
 
 ```bash
-pipx install butano-img
+pipx install butano-img[tui]
 ```
 
 ## Usage
@@ -54,6 +63,52 @@ butano-img sizes affine_bg
 ```bash
 butano-img validate player.png -t sprite
 ```
+
+### Convert a sprite sheet
+
+For an image containing multiple animation frames stacked vertically:
+
+```bash
+butano-img convert walk_cycle.png -h 32  # Each frame is 32px tall
+```
+
+This generates JSON with `"height": 32`, telling Butano to split the image.
+
+### Use compression
+
+Reduce ROM size with compression (processed during Butano build):
+
+```bash
+butano-img convert level.png -t regular_bg --compression lz77
+```
+
+Available compression options: `none`, `lz77`, `run_length`, `huffman`, `auto`
+
+### Interactive TUI
+
+Launch the terminal user interface for visual file browsing:
+
+```bash
+butano-img tui
+```
+
+Or use the standalone command:
+
+```bash
+butano-img-tui
+```
+
+**TUI Features:**
+- Browse files with a directory tree
+- See image dimensions and validation status in real-time
+- Select asset type and color mode
+- Configure sprite height and compression
+- Convert with a single keypress
+
+**Keyboard shortcuts:**
+- `C` - Convert selected file
+- `R` - Refresh directory tree
+- `Q` - Quit
 
 ## Valid Sizes
 
