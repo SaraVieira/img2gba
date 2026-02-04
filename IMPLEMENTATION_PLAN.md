@@ -1,6 +1,6 @@
 # Butano Image Converter - Implementation Plan
 
-A tool to convert PNG images to Butano-compatible BMP files with proper indexed colors, transparency handling, and JSON generation.
+A Python CLI/TUI tool to convert PNG images to Butano-compatible BMP files with proper indexed colors, transparency handling, and JSON generation.
 
 ---
 
@@ -15,162 +15,67 @@ A tool to convert PNG images to Butano-compatible BMP files with proper indexed 
 
 ---
 
-## Technology Evaluation
+## Technology Stack
 
-### Language Options
+**Python + Pillow + Click → Textual TUI**
 
-| Language | Pros | Cons |
-|----------|------|------|
-| **Python** | Best palette manipulation (Pillow), easy to prototype, cross-platform | Requires Python runtime, slower |
-| **Rust** | Fast, single binary, great for CLI/TUI, Tauri for GUI | Limited indexed BMP writing in `image` crate |
-| **Node.js** | Familiar to web devs, good for Electron | Poor indexed color support in sharp/jimp |
+| Component | Library | Purpose |
+|-----------|---------|---------|
+| Image Processing | Pillow | Palette manipulation, quantization, BMP output |
+| CLI | Click | Command-line interface |
+| TUI | Textual | Interactive terminal UI (Phase 2) |
 
-### Image Processing Libraries
+### Why Python + Pillow?
 
-| Library | Indexed Support | BMP Writing | Palette Control |
-|---------|-----------------|-------------|-----------------|
-| **Python Pillow** | Excellent | Yes | Full control with `putpalette()` |
-| **ImageMagick** | Excellent | Yes (BMP3) | Via CLI flags |
-| **Rust image crate** | Read only | Limited | No palette write support |
-| **Rust imagequant** | Quantization only | No | N/A (output to other crate) |
-| **Node.js sharp** | PNG only | No BMP | Limited |
-| **Node.js jimp** | Limited | Yes (but no control) | Cannot reorder palette |
+Pillow provides everything we need for indexed color manipulation:
 
----
-
-### Why Not Node.js? (Detailed Analysis)
-
-Node.js would be the natural choice for many web developers, but the ecosystem has significant gaps for this specific use case:
-
-#### 1. **sharp** - The Most Popular Option
-- **No BMP output at all** - sharp uses libvips which doesn't support BMP writing
-- **Indexed color only for PNG** - The `palette: true` option only works for PNG output
-- **No palette manipulation** - Cannot access or reorder color palette entries
-- **No control over transparency index** - Cannot specify which palette index is transparent
-
-```javascript
-// This is ALL you can do with sharp for indexed colors:
-sharp(input).png({ palette: true }).toFile('output.png')
-// No BMP, no palette control, no transparency index
-```
-
-#### 2. **jimp** - Pure JavaScript Alternative
-- **Can read/write BMP** - But only 24-bit or 32-bit, not indexed
-- **No indexed color output** - Cannot produce 4bpp or 8bpp BMPs
-- **No palette access** - `image.bitmap.palette` doesn't work as expected ([GitHub issue #996](https://github.com/jimp-dev/jimp/issues/996))
-- **No bit depth control** - Cannot specify 4-bit or 8-bit output ([GitHub issue #633](https://github.com/oliver-moran/jimp/issues/633))
-
-```javascript
-// jimp can convert formats, but NOT to indexed color:
-Jimp.read("input.png").then(img => img.write("output.bmp"))
-// Output is 24-bit RGB, NOT indexed - grit will reject this
-```
-
-#### 3. **What We Actually Need
-
-| Requirement | sharp | jimp | Pillow |
-|-------------|-------|------|--------|
-| Write BMP | No | Yes (24-bit only) | Yes (indexed) |
-| Quantize to 256 colors | No | No | Yes |
-| Quantize to 16 colors | No | No | Yes |
-| Access palette array | No | No | Yes (`getpalette()`) |
-| Reorder palette | No | No | Yes (`putpalette()`) |
-| Set transparency index | No | No | Yes |
-| Control bit depth | No | No | Yes (4bpp/8bpp) |
-
-#### 4. **Potential Node.js Workarounds**
-
-If we wanted to use Node.js anyway, we'd have to:
-
-1. **Shell out to ImageMagick** - Use `child_process` to call `convert` CLI
-   ```javascript
-   exec('convert input.png -type Palette -colors 256 BMP3:output.bmp')
-   ```
-   - Adds external dependency (ImageMagick must be installed)
-   - Loses the "pure JavaScript" advantage
-   - Error handling becomes messy
-
-2. **Write a custom BMP encoder** - Implement indexed BMP format from scratch
-   - BMP format is simple but tedious
-   - Would need to handle palette embedding, pixel packing for 4bpp
-   - Significant development effort for no real benefit
-
-3. **Use WebAssembly** - Compile Pillow or another library to WASM
-   - Complex build setup
-   - Performance overhead
-   - Overkill for this use case
-
-#### 5. **Bottom Line**
-
-Node.js image libraries are optimized for **web use cases**: resizing JPEGs, generating thumbnails, converting between web formats. They're not designed for **retro/embedded use cases** that require precise control over:
-- Color palettes
-- Bit depth
-- Indexed color modes
-- Legacy formats like BMP
-
-**Python + Pillow** was literally designed for this kind of image manipulation and has 30+ years of development behind it.
-
-### UI Framework Options
-
-| Type | Framework | Binary Size | Best For |
-|------|-----------|-------------|----------|
-| **CLI** | Python argparse/click | N/A (needs Python) | Quick & portable |
-| **CLI** | Rust clap | ~2-5 MB | Single binary distribution |
-| **TUI** | Rust ratatui | ~3-6 MB | Interactive terminal |
-| **GUI** | Tauri | ~8-15 MB | Lightweight desktop app |
-| **GUI** | Electron | ~80-120 MB | Rich web-based UI |
+| Requirement | Pillow Support |
+|-------------|----------------|
+| Write indexed BMP | ✅ Yes |
+| Quantize to 16/256 colors | ✅ `quantize()` |
+| Access palette array | ✅ `getpalette()` |
+| Reorder palette | ✅ `putpalette()` |
+| Set transparency index | ✅ Via palette position |
+| Control bit depth | ✅ 4bpp/8bpp |
 
 ---
 
-## Recommended Approach
+## Distribution
 
-### Option A: Python CLI (Fastest to Build) ⭐ Recommended to Start
+Users can install via multiple methods:
 
-**Stack:** Python + Pillow + Click
+| Method | Command | Notes |
+|--------|---------|-------|
+| **Homebrew** | `brew install butano-img` | macOS/Linux, manages Python |
+| **pipx** | `pipx install butano-img` | Isolated environment |
+| **PyPI** | `pip install butano-img` | Standard Python install |
+| **Standalone** | Download binary | PyInstaller bundle (~20MB) |
 
-**Why:**
-- Pillow has the best palette manipulation capabilities
-- Can reorder palette, set transparency index, control BMP output
-- Quick to prototype and iterate
-- Can be packaged with PyInstaller for distribution
+### Homebrew Formula (Future)
 
-**Architecture:**
+```ruby
+class ButanoImg < Formula
+  include Language::Python::Virtualenv
+
+  desc "Convert images to Butano GBA format"
+  homepage "https://github.com/user/butano-img"
+  url "https://files.pythonhosted.org/packages/.../butano-img-0.1.0.tar.gz"
+
+  depends_on "python@3.12"
+
+  resource "pillow" do
+    url "https://files.pythonhosted.org/packages/.../pillow-10.0.0.tar.gz"
+  end
+
+  resource "click" do
+    url "https://files.pythonhosted.org/packages/.../click-8.0.0.tar.gz"
+  end
+
+  def install
+    virtualenv_install_with_resources
+  end
+end
 ```
-butano-img/
-├── butano_img/
-│   ├── __init__.py
-│   ├── cli.py          # Click CLI interface
-│   ├── converter.py    # Core conversion logic
-│   ├── palette.py      # Palette manipulation
-│   ├── validator.py    # Size validation
-│   └── json_gen.py     # JSON file generation
-├── pyproject.toml
-└── README.md
-```
-
----
-
-### Option B: Rust CLI + Python Core (Best of Both)
-
-**Stack:** Rust CLI shell calling Python for image processing
-
-**Why:**
-- Single binary distribution via Rust
-- Python handles complex palette manipulation
-- Embedded Python or subprocess calls
-
----
-
-### Option C: Rust + Tauri GUI (Best UX)
-
-**Stack:** Rust + Tauri + imagequant + custom BMP writer
-
-**Why:**
-- Beautiful drag-and-drop interface
-- Tiny binary (~10 MB)
-- No runtime dependencies
-
-**Challenge:** Need to implement indexed BMP writing manually or find/create a crate for it.
 
 ---
 
@@ -191,17 +96,17 @@ If the image has transparency, find a color NOT used in the image:
 
 ```python
 def find_unused_color(img):
-    used_colors = set(img.getdata())
+    used_colors = set((r, g, b) for r, g, b, a in img.getdata())
     # Try magenta first (common transparency color)
     candidates = [(255, 0, 255), (0, 255, 255), (255, 255, 0)]
     for color in candidates:
-        if (color[0], color[1], color[2], 255) not in used_colors:
+        if color not in used_colors:
             return color
     # Generate random color if all candidates used
     import random
     while True:
         color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
-        if (color[0], color[1], color[2], 255) not in used_colors:
+        if color not in used_colors:
             return color
 ```
 
@@ -221,15 +126,11 @@ def replace_transparency(img, trans_color):
 ### Step 4: Quantize to Indexed Colors
 
 ```python
-def quantize_image(img, num_colors=256, trans_color=None):
+def quantize_image(img, num_colors=256):
     # Convert to RGB (remove alpha channel)
     rgb_img = img.convert("RGB")
-
     # Quantize to palette
-    # Reserve one slot for transparency color
-    actual_colors = num_colors - 1 if trans_color else num_colors
-    indexed = rgb_img.quantize(colors=actual_colors, method=Image.Quantize.MEDIANCUT)
-
+    indexed = rgb_img.quantize(colors=num_colors, method=Image.Quantize.MEDIANCUT)
     return indexed
 ```
 
@@ -251,7 +152,6 @@ def reorder_palette_transparency_first(img, trans_color):
 
     # Swap palette entries
     new_palette = list(palette)
-    # Swap index 0 with trans_index
     new_palette[0:3], new_palette[trans_index*3:trans_index*3+3] = \
         new_palette[trans_index*3:trans_index*3+3], new_palette[0:3]
 
@@ -362,7 +262,9 @@ Examples:
 
 ---
 
-## TUI Interface Design (Future)
+## TUI Interface Design (Phase 2)
+
+Using **Textual** for a modern Python TUI:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -398,67 +300,52 @@ Examples:
 
 ---
 
-## GUI (Tauri) Interface Design (Future)
-
-A drag-and-drop interface where users can:
-1. Drop PNG files onto the window
-2. See a preview with detected issues
-3. Configure options via simple toggles
-4. Batch convert multiple files
-5. See the generated palette with transparency highlighted
-
----
-
 ## Implementation Phases
 
-### Phase 1: Python CLI (MVP)
-- [ ] Basic PNG to indexed BMP conversion
+### Phase 1: CLI (MVP)
+- [ ] Project setup (pyproject.toml, structure)
+- [ ] Core conversion logic with Pillow
 - [ ] Transparency detection and handling
 - [ ] Palette reordering (transparency first)
 - [ ] Size validation with warnings
 - [ ] JSON generation
 - [ ] CLI with Click
+- [ ] Basic tests
 
-**Estimated effort:** Core functionality
-
-### Phase 2: Enhanced CLI
-- [ ] Batch processing (multiple files/directories)
-- [ ] Auto-resize option
-- [ ] Custom transparency color
-- [ ] Verbose/debug output
-- [ ] Config file support
-
-### Phase 3: TUI (Optional)
-- [ ] Rust TUI with ratatui
-- [ ] Interactive file browser
-- [ ] Live preview
+### Phase 2: TUI
+- [ ] Add Textual dependency
+- [ ] File browser widget
+- [ ] Options panel
+- [ ] Preview display
 - [ ] Palette visualization
+- [ ] Batch processing
 
-### Phase 4: GUI (Optional)
-- [ ] Tauri app with drag-and-drop
-- [ ] Image preview
-- [ ] Batch processing UI
-- [ ] Settings persistence
+### Phase 3: Distribution
+- [ ] PyPI package
+- [ ] Homebrew formula
+- [ ] PyInstaller standalone builds
+- [ ] GitHub releases
 
 ---
 
-## File Structure (Phase 1)
+## File Structure
 
 ```
 butano-img/
-├── butano_img/
-│   ├── __init__.py
-│   ├── cli.py              # CLI entry point
-│   ├── converter.py        # Main conversion orchestration
-│   ├── palette.py          # Palette manipulation utilities
-│   ├── transparency.py     # Transparency handling
-│   ├── validator.py        # Size validation
-│   ├── json_generator.py   # JSON file creation
-│   └── constants.py        # Valid sizes, defaults
+├── src/
+│   └── butano_img/
+│       ├── __init__.py
+│       ├── cli.py              # Click CLI entry point
+│       ├── converter.py        # Main conversion orchestration
+│       ├── palette.py          # Palette manipulation utilities
+│       ├── transparency.py     # Transparency handling
+│       ├── validator.py        # Size validation
+│       ├── json_generator.py   # JSON file creation
+│       └── constants.py        # Valid sizes, defaults
 ├── tests/
 │   ├── test_converter.py
 │   ├── test_palette.py
-│   └── fixtures/           # Test images
+│   └── fixtures/               # Test images
 ├── pyproject.toml
 ├── README.md
 └── LICENSE
@@ -466,18 +353,23 @@ butano-img/
 
 ---
 
-## Dependencies (Phase 1)
+## Dependencies
 
 ```toml
 [project]
 name = "butano-img"
 version = "0.1.0"
+description = "Convert images to Butano GBA format"
+requires-python = ">=3.10"
 dependencies = [
     "Pillow>=10.0.0",
     "click>=8.0.0",
 ]
 
 [project.optional-dependencies]
+tui = [
+    "textual>=0.40.0",
+]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov",
@@ -485,17 +377,11 @@ dev = [
 
 [project.scripts]
 butano-img = "butano_img.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 ```
-
----
-
-## Risks & Mitigations
-
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Pillow BMP output not compatible with grit | High | Test with actual Butano build; fallback to ImageMagick subprocess |
-| Color quantization loses too much detail | Medium | Offer multiple algorithms (median cut, octree); allow manual palette |
-| Large images cause memory issues | Low | Stream processing; warn on large files |
 
 ---
 
@@ -507,15 +393,13 @@ butano-img = "butano_img.cli:main"
 4. ✅ JSON file generated with correct structure
 5. ✅ Warnings shown for invalid sprite/background sizes
 6. ✅ Works on Windows, macOS, Linux
+7. ✅ Installable via pip/pipx/brew
 
 ---
 
 ## References
 
 - [Pillow Documentation](https://pillow.readthedocs.io/en/stable/)
-- [imagequant (Rust)](https://lib.rs/crates/imagequant)
-- [quantette (Rust)](https://lib.rs/crates/quantette)
-- [Ratatui TUI](https://ratatui.rs/)
-- [Tauri](https://tauri.app/)
-- [Click CLI](https://click.palletsprojects.com/)
+- [Click Documentation](https://click.palletsprojects.com/)
+- [Textual Documentation](https://textual.textualize.io/)
 - [Butano Import Docs](https://gvaliente.github.io/butano/import.html)

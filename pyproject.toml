@@ -1,0 +1,51 @@
+[project]
+name = "butano-img"
+version = "0.1.0"
+description = "Convert images to Butano GBA format"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Sara Vieira" }]
+keywords = ["gba", "butano", "gameboy", "image", "converter"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Games/Entertainment",
+    "Topic :: Multimedia :: Graphics :: Graphics Conversion",
+]
+dependencies = [
+    "Pillow>=10.0.0",
+    "click>=8.0.0",
+]
+
+[project.optional-dependencies]
+tui = [
+    "textual>=0.40.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov",
+]
+
+[project.scripts]
+butano-img = "butano_img.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/SaraVieira/butano-img"
+Repository = "https://github.com/SaraVieira/butano-img"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/butano_img"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
