@@ -268,9 +268,25 @@ def convert_image(
             # Replace all transparent pixels with the transparency color
             img = replace_transparent_pixels(img, used_trans_color)
 
-        elif verbose:
-            # No transparency found in the image
-            print("No transparency detected in image")
+        else:
+            # No transparency in the image, but GBA still treats index 0 as transparent.
+            # We need to reserve index 0 for an unused color so no visible pixels
+            # accidentally become transparent.
+            if trans_color is None:
+                used_trans_color = find_unused_color(img)
+            else:
+                used_trans_color = trans_color
+
+            if verbose:
+                r, g, b = used_trans_color
+                print(f"No transparency detected, reserving index 0 for: RGB({r}, {g}, {b})")
+
+            # Add the reserved color to the image so it ends up in the palette.
+            # We put a single pixel of this color at position (0, 0).
+            # This pixel will become transparent on GBA, but since it's just one
+            # pixel in the corner, it's usually not noticeable.
+            img = img.copy()  # Don't modify the original
+            img.putpixel((0, 0), used_trans_color + (255,))  # RGBA format
 
     # --- Step 4: Quantize to indexed color ---
     if verbose:

@@ -92,11 +92,25 @@ class TestConvertImage:
         assert len(result.transparency_color) == 3
         assert all(0 <= c <= 255 for c in result.transparency_color)
 
-    def test_no_transparency_for_opaque(self, sample_opaque_image):
-        """Opaque images should have transparency_color=None."""
+    def test_opaque_image_reserves_index_0(self, sample_opaque_image):
+        """Opaque images should reserve index 0 with an unused color.
+
+        GBA hardware always treats palette index 0 as transparent.
+        Even for opaque images, we must reserve index 0 with a color
+        that isn't visible in the image, otherwise random pixels
+        could accidentally become transparent.
+        """
         result = convert_image(sample_opaque_image)
 
-        assert result.transparency_color is None
+        # Should have a reserved color for index 0
+        assert result.transparency_color is not None
+        assert len(result.transparency_color) == 3
+
+        # Verify the reserved color is at palette index 0
+        output_img = Image.open(result.output_path)
+        palette = output_img.getpalette()
+        index_0_color = (palette[0], palette[1], palette[2])
+        assert index_0_color == result.transparency_color
 
     def test_custom_transparency_color(self, sample_sprite):
         """Should use custom transparency color when specified."""
