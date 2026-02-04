@@ -34,6 +34,81 @@ A tool to convert PNG images to Butano-compatible BMP files with proper indexed 
 | **Rust image crate** | Read only | Limited | No palette write support |
 | **Rust imagequant** | Quantization only | No | N/A (output to other crate) |
 | **Node.js sharp** | PNG only | No BMP | Limited |
+| **Node.js jimp** | Limited | Yes (but no control) | Cannot reorder palette |
+
+---
+
+### Why Not Node.js? (Detailed Analysis)
+
+Node.js would be the natural choice for many web developers, but the ecosystem has significant gaps for this specific use case:
+
+#### 1. **sharp** - The Most Popular Option
+- **No BMP output at all** - sharp uses libvips which doesn't support BMP writing
+- **Indexed color only for PNG** - The `palette: true` option only works for PNG output
+- **No palette manipulation** - Cannot access or reorder color palette entries
+- **No control over transparency index** - Cannot specify which palette index is transparent
+
+```javascript
+// This is ALL you can do with sharp for indexed colors:
+sharp(input).png({ palette: true }).toFile('output.png')
+// No BMP, no palette control, no transparency index
+```
+
+#### 2. **jimp** - Pure JavaScript Alternative
+- **Can read/write BMP** - But only 24-bit or 32-bit, not indexed
+- **No indexed color output** - Cannot produce 4bpp or 8bpp BMPs
+- **No palette access** - `image.bitmap.palette` doesn't work as expected ([GitHub issue #996](https://github.com/jimp-dev/jimp/issues/996))
+- **No bit depth control** - Cannot specify 4-bit or 8-bit output ([GitHub issue #633](https://github.com/oliver-moran/jimp/issues/633))
+
+```javascript
+// jimp can convert formats, but NOT to indexed color:
+Jimp.read("input.png").then(img => img.write("output.bmp"))
+// Output is 24-bit RGB, NOT indexed - grit will reject this
+```
+
+#### 3. **What We Actually Need
+
+| Requirement | sharp | jimp | Pillow |
+|-------------|-------|------|--------|
+| Write BMP | No | Yes (24-bit only) | Yes (indexed) |
+| Quantize to 256 colors | No | No | Yes |
+| Quantize to 16 colors | No | No | Yes |
+| Access palette array | No | No | Yes (`getpalette()`) |
+| Reorder palette | No | No | Yes (`putpalette()`) |
+| Set transparency index | No | No | Yes |
+| Control bit depth | No | No | Yes (4bpp/8bpp) |
+
+#### 4. **Potential Node.js Workarounds**
+
+If we wanted to use Node.js anyway, we'd have to:
+
+1. **Shell out to ImageMagick** - Use `child_process` to call `convert` CLI
+   ```javascript
+   exec('convert input.png -type Palette -colors 256 BMP3:output.bmp')
+   ```
+   - Adds external dependency (ImageMagick must be installed)
+   - Loses the "pure JavaScript" advantage
+   - Error handling becomes messy
+
+2. **Write a custom BMP encoder** - Implement indexed BMP format from scratch
+   - BMP format is simple but tedious
+   - Would need to handle palette embedding, pixel packing for 4bpp
+   - Significant development effort for no real benefit
+
+3. **Use WebAssembly** - Compile Pillow or another library to WASM
+   - Complex build setup
+   - Performance overhead
+   - Overkill for this use case
+
+#### 5. **Bottom Line**
+
+Node.js image libraries are optimized for **web use cases**: resizing JPEGs, generating thumbnails, converting between web formats. They're not designed for **retro/embedded use cases** that require precise control over:
+- Color palettes
+- Bit depth
+- Indexed color modes
+- Legacy formats like BMP
+
+**Python + Pillow** was literally designed for this kind of image manipulation and has 30+ years of development behind it.
 
 ### UI Framework Options
 
