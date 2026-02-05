@@ -30,6 +30,27 @@ Or with pipx:
 pipx install butano-img[tui]
 ```
 
+### Development Installation
+
+To install from source for development:
+
+```bash
+# Clone the repository
+git clone https://github.com/SaraVieira/gba-images.git
+cd gba-images
+
+# Create a virtual environment
+python3 -m venv venv
+
+# Activate it
+source venv/bin/activate
+
+# Install with dev dependencies
+pip install -e ".[dev]"
+```
+
+Each time you open a new terminal, activate the venv with `source venv/bin/activate`.
+
 ## Usage
 
 ### Basic conversion
