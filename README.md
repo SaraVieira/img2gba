@@ -21,13 +21,13 @@ pip install butano-img
 With TUI support:
 
 ```bash
-pip install butano-img[tui]
+pip install "butano-img[tui]"
 ```
 
 Or with pipx:
 
 ```bash
-pipx install butano-img[tui]
+pipx install "butano-img[tui]"
 ```
 
 ### Development Installation
@@ -45,8 +45,8 @@ python3 -m venv venv
 # Activate it
 source venv/bin/activate
 
-# Install with dev dependencies
-pip install -e ".[dev]"
+# Install with dev dependencies (includes TUI)
+pip install -e ".[dev,tui]"
 ```
 
 Each time you open a new terminal, activate the venv with `source venv/bin/activate`.
