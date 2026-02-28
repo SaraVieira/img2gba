@@ -52,8 +52,8 @@ def main():
 @click.option(
     "-c", "--colors",
     type=click.Choice(["16", "256"]),
-    default="256",
-    help="Number of colors (default: 256)",
+    default="16",
+    help="Number of colors (default: 16)",
 )
 @click.option(
     "--no-transparency",
