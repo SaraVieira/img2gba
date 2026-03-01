@@ -36,8 +36,8 @@ To install from source for development:
 
 ```bash
 # Clone the repository
-git clone https://github.com/SaraVieira/gba-images.git
-cd gba-images
+git clone https://github.com/SaraVieira/img2gba.git
+cd img2gba
 
 # Create a virtual environment
 python3 -m venv venv
@@ -120,6 +120,7 @@ img2gba-tui
 ```
 
 **TUI Features:**
+
 - Browse files with a directory tree
 - See image dimensions and validation status in real-time
 - Select asset type and color mode
@@ -127,6 +128,7 @@ img2gba-tui
 - Convert with a single keypress
 
 **Keyboard shortcuts:**
+
 - `C` - Convert selected file
 - `R` - Refresh directory tree
 - `Q` - Quit
@@ -136,7 +138,7 @@ img2gba-tui
 ### Sprites
 
 | Shape  | Sizes                    |
-|--------|--------------------------|
+| ------ | ------------------------ |
 | Square | 8x8, 16x16, 32x32, 64x64 |
 | Wide   | 16x8, 32x8, 32x16, 64x32 |
 | Tall   | 8x16, 8x32, 16x32, 32x64 |
