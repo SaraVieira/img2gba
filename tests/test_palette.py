@@ -1,13 +1,4 @@
-"""
-Tests for the palette module.
-
-These tests verify that:
-- Color quantization works correctly
-- Palette colors can be retrieved
-- Palette reordering works for transparency
-
-Run with: pytest tests/test_palette.py -v
-"""
+"""Tests for the palette module."""
 
 import pytest
 from PIL import Image

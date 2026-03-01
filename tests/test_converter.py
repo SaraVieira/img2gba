@@ -1,15 +1,4 @@
-"""
-Tests for the converter module.
-
-These tests verify the complete conversion pipeline:
-- Loading images
-- Handling transparency
-- Quantizing colors
-- Saving output files
-- Generating JSON metadata
-
-Run with: pytest tests/test_converter.py -v
-"""
+"""Tests for the converter module."""
 
 import pytest
 from pathlib import Path
@@ -93,13 +82,7 @@ class TestConvertImage:
         assert all(0 <= c <= 255 for c in result.transparency_color)
 
     def test_opaque_image_reserves_index_0(self, sample_opaque_image):
-        """Opaque images should reserve index 0 with an unused color.
-
-        GBA hardware always treats palette index 0 as transparent.
-        Even for opaque images, we must reserve index 0 with a color
-        that isn't visible in the image, otherwise random pixels
-        could accidentally become transparent.
-        """
+        """Opaque images should reserve index 0 with an unused color."""
         result = convert_image(sample_opaque_image)
 
         # Should have a reserved color for index 0

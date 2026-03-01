@@ -1,4 +1,4 @@
-"""Command-line interface for Butano image converter."""
+"""CLI for img2gba."""
 
 import sys
 from pathlib import Path
@@ -27,65 +27,21 @@ def parse_color(ctx, param, value):
 @click.group()
 @click.version_option(version=__version__, prog_name="img2gba")
 def main():
-    """Butano Image Converter - Convert images to GBA format.
-
-    Convert PNG images to Butano-compatible indexed BMP files with proper
-    transparency handling, palette management, and JSON metadata generation.
-    """
+    """img2gba - Convert images to GBA format."""
     pass
 
 
 @main.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
-@click.option(
-    "-o", "--output",
-    type=click.Path(path_type=Path),
-    help="Output BMP path (default: same as input with .bmp extension)",
-)
-@click.option(
-    "-t", "--type",
-    "asset_type",
-    type=click.Choice(VALID_ASSET_TYPES),
-    default="sprite",
-    help="Asset type (default: sprite)",
-)
-@click.option(
-    "-c", "--colors",
-    type=click.Choice(["16", "256"]),
-    default="16",
-    help="Number of colors (default: 16)",
-)
-@click.option(
-    "--no-transparency",
-    is_flag=True,
-    help="Don't handle transparency",
-)
-@click.option(
-    "--trans-color",
-    callback=parse_color,
-    help="Force specific transparency color (format: R,G,B)",
-)
-@click.option(
-    "--no-json",
-    is_flag=True,
-    help="Don't generate JSON metadata file",
-)
-@click.option(
-    "-h", "--height",
-    "sprite_height",
-    type=int,
-    help="Height of each sprite in a sprite sheet (for multi-sprite images)",
-)
-@click.option(
-    "--compression",
-    type=click.Choice(VALID_COMPRESSION_TYPES),
-    help="Compression method (none, lz77, run_length, huffman, auto)",
-)
-@click.option(
-    "-v", "--verbose",
-    is_flag=True,
-    help="Show detailed output",
-)
+@click.option("-o", "--output", type=click.Path(path_type=Path), help="Output BMP path")
+@click.option("-t", "--type", "asset_type", type=click.Choice(VALID_ASSET_TYPES), default="sprite", help="Asset type")
+@click.option("-c", "--colors", type=click.Choice(["16", "256"]), default="16", help="Number of colors")
+@click.option("--no-transparency", is_flag=True, help="Don't handle transparency")
+@click.option("--trans-color", callback=parse_color, help="Force transparency color (R,G,B)")
+@click.option("--no-json", is_flag=True, help="Don't generate JSON metadata")
+@click.option("-h", "--height", "sprite_height", type=int, help="Sprite height for sprite sheets")
+@click.option("--compression", type=click.Choice(VALID_COMPRESSION_TYPES), help="Compression method")
+@click.option("-v", "--verbose", is_flag=True, help="Show detailed output")
 def convert(
     input_file: Path,
     output: Path | None,
@@ -98,22 +54,7 @@ def convert(
     compression: str | None,
     verbose: bool,
 ):
-    """Convert a PNG image to Butano-compatible BMP format.
-
-    INPUT_FILE: Path to the PNG image to convert
-
-    Examples:
-
-        img2gba convert player.png
-
-        img2gba convert background.png -t regular_bg
-
-        img2gba convert tiles.png -c 16 -v
-
-        img2gba convert spritesheet.png -h 32  # Split into 32px high sprites
-
-        img2gba convert level.png -t regular_bg --compression lz77
-    """
+    """Convert a PNG image to Butano-compatible BMP format."""
     num_colors = COLORS_16 if colors == "16" else COLORS_256
 
     try:
@@ -130,7 +71,6 @@ def convert(
             verbose=verbose,
         )
 
-        # Print result
         if result.success:
             click.secho(f"Converted: {result.output_path}", fg="green")
 
@@ -164,28 +104,16 @@ def convert(
 @main.command()
 @click.argument("asset_type", type=click.Choice(VALID_ASSET_TYPES))
 def sizes(asset_type: str):
-    """Show valid sizes for an asset type.
-
-    ASSET_TYPE: One of 'sprite', 'regular_bg', 'affine_bg'
-    """
+    """Show valid sizes for an asset type."""
     click.echo(f"Valid sizes for {asset_type}:")
     click.echo(f"  {format_valid_sizes(asset_type)}")
 
 
 @main.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
-@click.option(
-    "-t", "--type",
-    "asset_type",
-    type=click.Choice(VALID_ASSET_TYPES),
-    default="sprite",
-    help="Asset type to validate against (default: sprite)",
-)
+@click.option("-t", "--type", "asset_type", type=click.Choice(VALID_ASSET_TYPES), default="sprite", help="Asset type to validate against")
 def validate(input_file: Path, asset_type: str):
-    """Validate an image's dimensions for Butano.
-
-    INPUT_FILE: Path to the image to validate
-    """
+    """Validate an image's dimensions for Butano."""
     from PIL import Image
     from .validator import validate_size
 
@@ -206,10 +134,7 @@ def validate(input_file: Path, asset_type: str):
 
 @main.command()
 def tui():
-    """Launch the interactive TUI (Terminal User Interface).
-
-    Requires the 'tui' extra: pip install img2gba[tui]
-    """
+    """Launch the interactive TUI."""
     try:
         from .tui import main as tui_main
         tui_main()

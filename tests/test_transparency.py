@@ -1,13 +1,4 @@
-"""
-Tests for the transparency module.
-
-These tests verify that:
-- Transparent pixels are correctly detected
-- Unused colors are found correctly
-- Transparent pixels are replaced with the correct color
-
-Run with: pytest tests/test_transparency.py -v
-"""
+"""Tests for the transparency module."""
 
 import pytest
 from PIL import Image

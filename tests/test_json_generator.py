@@ -1,14 +1,4 @@
-"""
-Tests for the JSON generator module.
-
-These tests verify that:
-- JSON files are generated with the correct structure
-- Height option is included for sprite sheets
-- Compression option is included when specified
-- BPP mode is correctly set
-
-Run with: pytest tests/test_json_generator.py -v
-"""
+"""Tests for the JSON generator module."""
 
 import json
 import pytest

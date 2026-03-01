@@ -1,13 +1,4 @@
-"""
-Tests for the validator module.
-
-These tests verify that:
-- Valid sizes are recognized correctly
-- Invalid sizes are rejected with suggestions
-- All asset types work correctly
-
-Run with: pytest tests/test_validator.py -v
-"""
+"""Tests for the validator module."""
 
 import pytest
 
