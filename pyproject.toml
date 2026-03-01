@@ -1,5 +1,5 @@
 [project]
-name = "butano-img"
+name = "img2gba"
 version = "0.1.0"
 description = "Convert images to Butano GBA format"
 readme = "README.md"
