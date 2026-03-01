@@ -12,7 +12,7 @@ Run with: pytest tests/test_palette.py -v
 import pytest
 from PIL import Image
 
-from butano_img.palette import (
+from img2gba.palette import (
     quantize_image,
     get_palette_as_tuples,
     find_color_index,

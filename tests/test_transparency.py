@@ -12,12 +12,12 @@ Run with: pytest tests/test_transparency.py -v
 import pytest
 from PIL import Image
 
-from butano_img.transparency import (
+from img2gba.transparency import (
     has_transparency,
     find_unused_color,
     replace_transparent_pixels,
 )
-from butano_img.constants import DEFAULT_TRANSPARENCY_COLORS
+from img2gba.constants import DEFAULT_TRANSPARENCY_COLORS
 
 
 class TestHasTransparency:

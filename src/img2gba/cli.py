@@ -25,7 +25,7 @@ def parse_color(ctx, param, value):
 
 
 @click.group()
-@click.version_option(version=__version__, prog_name="butano-img")
+@click.version_option(version=__version__, prog_name="img2gba")
 def main():
     """Butano Image Converter - Convert images to GBA format.
 
@@ -104,15 +104,15 @@ def convert(
 
     Examples:
 
-        butano-img convert player.png
+        img2gba convert player.png
 
-        butano-img convert background.png -t regular_bg
+        img2gba convert background.png -t regular_bg
 
-        butano-img convert tiles.png -c 16 -v
+        img2gba convert tiles.png -c 16 -v
 
-        butano-img convert spritesheet.png -h 32  # Split into 32px high sprites
+        img2gba convert spritesheet.png -h 32  # Split into 32px high sprites
 
-        butano-img convert level.png -t regular_bg --compression lz77
+        img2gba convert level.png -t regular_bg --compression lz77
     """
     num_colors = COLORS_16 if colors == "16" else COLORS_256
 
@@ -208,7 +208,7 @@ def validate(input_file: Path, asset_type: str):
 def tui():
     """Launch the interactive TUI (Terminal User Interface).
 
-    Requires the 'tui' extra: pip install butano-img[tui]
+    Requires the 'tui' extra: pip install img2gba[tui]
     """
     try:
         from .tui import main as tui_main
@@ -216,7 +216,7 @@ def tui():
     except ImportError:
         click.secho(
             "Error: TUI dependencies not installed.\n"
-            "Install with: pip install butano-img[tui]",
+            "Install with: pip install img2gba[tui]",
             fg="red",
             err=True,
         )

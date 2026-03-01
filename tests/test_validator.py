@@ -11,13 +11,13 @@ Run with: pytest tests/test_validator.py -v
 
 import pytest
 
-from butano_img.validator import (
+from img2gba.validator import (
     validate_size,
     get_valid_sizes,
     format_valid_sizes,
     ValidationResult,
 )
-from butano_img.constants import (
+from img2gba.constants import (
     VALID_SPRITE_SIZES,
     VALID_REGULAR_BG_SIZES,
     VALID_AFFINE_BG_SIZES,

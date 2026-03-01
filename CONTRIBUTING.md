@@ -1,6 +1,6 @@
 # Developer Documentation
 
-This guide explains how the butano-img tool works internally, how to set up a development environment, and how to contribute.
+This guide explains how the img2gba tool works internally, how to set up a development environment, and how to contribute.
 
 ## Table of Contents
 
@@ -45,7 +45,7 @@ pip install -e ".[dev]"
 
 ```bash
 # Should show help text
-butano-img --help
+img2gba --help
 
 # Run the tests
 pytest
@@ -58,7 +58,7 @@ pytest
 ```
 gba-images/
 ├── src/
-│   └── butano_img/           # Main package (all the code lives here)
+│   └── img2gba/           # Main package (all the code lives here)
 │       ├── __init__.py       # Package initialization, exports public API
 │       ├── cli.py            # Command-line interface (what users interact with)
 │       ├── constants.py      # Valid sizes and other constants
@@ -83,7 +83,7 @@ gba-images/
 
 | File | Purpose |
 |------|---------|
-| `__init__.py` | Makes the folder a "package". Also defines what gets exported when someone does `from butano_img import ...` |
+| `__init__.py` | Makes the folder a "package". Also defines what gets exported when someone does `from img2gba import ...` |
 | `cli.py` | Defines the command-line commands (`convert`, `validate`, `sizes`) using the Click library |
 | `constants.py` | Stores all the valid sprite/background sizes. Easy to find and modify. |
 | `converter.py` | The "brain" - coordinates loading images, processing them, and saving results |
@@ -98,7 +98,7 @@ gba-images/
 
 ### The Conversion Pipeline
 
-When you run `butano-img convert image.png`, here's what happens:
+When you run `img2gba convert image.png`, here's what happens:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -268,7 +268,7 @@ pytest tests/test_validator.py
 pytest tests/test_validator.py::test_valid_sprite_sizes
 
 # Run with coverage report
-pytest --cov=butano_img
+pytest --cov=img2gba
 ```
 
 ### Writing tests

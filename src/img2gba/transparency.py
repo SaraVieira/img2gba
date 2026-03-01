@@ -20,7 +20,7 @@ How It Works:
 Example:
 --------
     from PIL import Image
-    from butano_img.transparency import (
+    from img2gba.transparency import (
         has_transparency,
         find_unused_color,
         replace_transparent_pixels,

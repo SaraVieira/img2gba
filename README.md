@@ -15,19 +15,19 @@ Convert PNG images to Butano GBA-compatible indexed BMP format.
 ## Installation
 
 ```bash
-pip install butano-img
+pip install img2gba
 ```
 
 With TUI support:
 
 ```bash
-pip install butano-img[tui]
+pip install img2gba[tui]
 ```
 
 Or with pipx:
 
 ```bash
-pipx install butano-img[tui]
+pipx install img2gba[tui]
 ```
 
 ### Development Installation
@@ -56,33 +56,33 @@ Each time you open a new terminal, activate the venv with `source venv/bin/activ
 ### Basic conversion
 
 ```bash
-butano-img convert player.png
+img2gba convert player.png
 ```
 
 ### Specify asset type
 
 ```bash
-butano-img convert background.png -t regular_bg
+img2gba convert background.png -t regular_bg
 ```
 
 ### Use 16 colors instead of 256
 
 ```bash
-butano-img convert tiles.png -c 16
+img2gba convert tiles.png -c 16
 ```
 
 ### Show valid sizes
 
 ```bash
-butano-img sizes sprite
-butano-img sizes regular_bg
-butano-img sizes affine_bg
+img2gba sizes sprite
+img2gba sizes regular_bg
+img2gba sizes affine_bg
 ```
 
 ### Validate an image
 
 ```bash
-butano-img validate player.png -t sprite
+img2gba validate player.png -t sprite
 ```
 
 ### Convert a sprite sheet
@@ -90,7 +90,7 @@ butano-img validate player.png -t sprite
 For an image containing multiple animation frames stacked vertically:
 
 ```bash
-butano-img convert walk_cycle.png -h 32  # Each frame is 32px tall
+img2gba convert walk_cycle.png -h 32  # Each frame is 32px tall
 ```
 
 This generates JSON with `"height": 32`, telling Butano to split the image.
@@ -100,7 +100,7 @@ This generates JSON with `"height": 32`, telling Butano to split the image.
 Reduce ROM size with compression (processed during Butano build):
 
 ```bash
-butano-img convert level.png -t regular_bg --compression lz77
+img2gba convert level.png -t regular_bg --compression lz77
 ```
 
 Available compression options: `none`, `lz77`, `run_length`, `huffman`, `auto`
@@ -110,13 +110,13 @@ Available compression options: `none`, `lz77`, `run_length`, `huffman`, `auto`
 Launch the terminal user interface for visual file browsing:
 
 ```bash
-butano-img tui
+img2gba tui
 ```
 
 Or use the standalone command:
 
 ```bash
-butano-img-tui
+img2gba-tui
 ```
 
 **TUI Features:**

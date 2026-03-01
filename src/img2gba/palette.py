@@ -30,7 +30,7 @@ Key Functions:
 Example Usage:
 --------------
     from PIL import Image
-    from butano_img.palette import quantize_image, reorder_palette_transparency_first
+    from img2gba.palette import quantize_image, reorder_palette_transparency_first
 
     # Load and prepare image
     img = Image.open("sprite.png")

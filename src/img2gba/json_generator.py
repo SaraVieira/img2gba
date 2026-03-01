@@ -49,7 +49,7 @@ https://gvaliente.github.io/butano/import.html
 
 Example Usage:
 --------------
-    from butano_img.json_generator import generate_json, read_json
+    from img2gba.json_generator import generate_json, read_json
 
     # Generate JSON for a sprite
     json_path = generate_json("player.bmp", asset_type="sprite", bpp=8)

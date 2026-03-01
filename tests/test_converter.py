@@ -15,7 +15,7 @@ import pytest
 from pathlib import Path
 from PIL import Image
 
-from butano_img.converter import convert_image, ConversionResult
+from img2gba.converter import convert_image, ConversionResult
 
 
 @pytest.fixture

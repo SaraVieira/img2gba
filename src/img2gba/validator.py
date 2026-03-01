@@ -30,7 +30,7 @@ Affine Backgrounds:
 
 Example Usage:
 --------------
-    from butano_img.validator import validate_size
+    from img2gba.validator import validate_size
 
     # Check a sprite
     result = validate_size(100, 50, "sprite")

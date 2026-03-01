@@ -1,7 +1,7 @@
 """
 Constants for Butano image conversion.
 
-This module defines all the constant values used throughout the butano-img tool.
+This module defines all the constant values used throughout the img2gba tool.
 Centralizing constants here makes them easy to find and modify.
 
 GBA Hardware Background:

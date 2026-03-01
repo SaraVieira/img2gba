@@ -16,7 +16,7 @@ from pathlib import Path
 import tempfile
 import os
 
-from butano_img.json_generator import generate_json, read_json
+from img2gba.json_generator import generate_json, read_json
 
 
 class TestGenerateJsonBasic:

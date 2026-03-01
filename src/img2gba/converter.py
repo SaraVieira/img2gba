@@ -31,7 +31,7 @@ The Conversion Pipeline:
 
 Example Usage:
 --------------
-    from butano_img.converter import convert_image
+    from img2gba.converter import convert_image
 
     # Simple usage - convert with all defaults
     result = convert_image("player.png")
@@ -123,7 +123,7 @@ def convert_image(
     """
     Convert a PNG image to a Butano-compatible indexed BMP file.
 
-    This is the main function of the butano-img tool. It takes a PNG file
+    This is the main function of the img2gba tool. It takes a PNG file
     and produces a BMP file that Butano/grit can use, along with the
     required JSON metadata file.
 

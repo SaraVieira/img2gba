@@ -5,9 +5,9 @@ A terminal user interface for converting images to Butano GBA format.
 Provides an interactive way to select files, configure options, and convert.
 
 Run with:
-    butano-img-tui
+    img2gba tui
     # or
-    python -m butano_img.tui
+    python -m img2gba.tui
 """
 
 from pathlib import Path
