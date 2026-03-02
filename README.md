@@ -30,6 +30,13 @@ Or with pipx:
 pipx install img2gba[tui]
 ```
 
+Or with Homebrew:
+
+```bash
+brew tap SaraVieira/tap
+brew install img2gba
+```
+
 ### Development Installation
 
 To install from source for development:
